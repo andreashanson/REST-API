@@ -40,14 +40,14 @@ app.put('/api/familymembers/:id', (req, res) => {
   }
   else {
     const schema = Joi.object().keys({
-      name: Joi.string().min(3)
+      name: Joi.string().min(3).required()
     });
     const data = req.body;
     Joi.validate(data, schema, (err, value) => {
       if (err) {
         res.status(400).json({
           status: "error",
-          message: "Invalid request data",
+          message: 'Not all required field set.',
           data: data
         });
       }
@@ -90,20 +90,26 @@ app.post('/api/familymembers', (req, res) => {
       });
     }
   });
+});
 
 
-  /*
-  if (!req.body.name || req.body.name.length < 3 ) {
-    res.status(400).send("Name is required and minimum 3 chars...");
+app.delete('/api/familymembers/:id', (req, res) => {
+  // Loook up the course
+  const id = req.params.id;
+  // Not existing, return 404
+  const familymember = familymembers.find(c => c.id === parseInt(id));
+  if (!familymember) {
+    res.status(404).json({message: `Familymember id: ${id} not found!`});
   }
 
-  const newCustomer = {
-    id: familymembers.length + 1,
-    name: req.body.name
-  }
-  familymembers.push(newCustomer);
-  res.json(newCustomer);
-  */
+  const index = familymembers.indexOf(familymember);
+  familymembers.splice(index, 1);
+
+  res.json({
+    status: "Success!",
+    message: "Familymember deleted...",
+    data: familymember
+  });
 });
 
 const port = process.env.PORT || 3000;
